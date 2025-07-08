@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - master
+env:
+  ELASTIC_BEANSTALK_NAME: frontend
+  ELASTIC_BEANSTALK_ENV_NAME: Frontend-env
 
 jobs:
   build:
@@ -18,4 +21,31 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build & Test Docker Image
-        run: docker build -t benjaminjm112/frontend -f Dockerfile.dev . && docker run --rm -e CI=true benjaminjm112/frontend npm run test 
+        run: |
+          docker build -t benjaminjm112/frontend -f Dockerfile.dev . && docker run --rm -e CI=true benjaminjm112/frontend npm run test
+          zip -r ./${{github.run_id}}.zip . -x '*.git*'
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4.3.3
+        with:
+          name: upload-files
+          path: ${{github.run_id}}.zip
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+      steps:
+      - uses: actions/download-artifact@v4.1.7
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ap-south-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Deploy to ElasticBeanstalk
+        run: |
+          aws s3 cp "upload-files/${{github.run_id}}.zip" s3://elasticbeanstalk-ap-south-1-841162669835/artifacts/
+          aws elasticbeanstalk create-application-version --application-name $ELASTIC_BEANSTALK_NAME --version-label ${{github.run_id}} --description ${{github.run_id}} --source-bundle S3Bucket="elasticbeanstalk-ap-south-1-841162669835",S3Key="artifacts/${{github.run_id}}.zip"
+          aws elasticbeanstalk update-environment --application-name $ELASTIC_BEANSTALK_NAME --environment-name $ELASTIC_BEANSTALK_ENV_NAME --version-label ${{github.run_id}}
+          aws elasticbeanstalk wait environment-updated --application-name $ELASTIC_BEANSTALK_NAME --environment-name $ELASTIC_BEANSTALK_ENV_NAME
+
