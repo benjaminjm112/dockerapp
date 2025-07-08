@@ -33,9 +33,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-
-      steps:
+    steps:
       - uses: actions/download-artifact@v4.1.7
+      with:
+           name: upload-files
+           path: upload-files
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
