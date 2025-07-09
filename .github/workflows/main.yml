@@ -29,10 +29,10 @@ jobs:
       - name: Deploy to ElasticBeanstalk
         uses: einaregilsson/beanstalk-deploy@v22
         with:
-          region: ap-south-1
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: frontend
           environment_name: Frontend-env
           version_label: ${{github.run_id}}
+          region: ap-south-1
           deployment_package: deploy.zip 
