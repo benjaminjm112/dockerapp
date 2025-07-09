@@ -1,13 +1,11 @@
 {
-    "AWSEBDockerrunVersion": "1",
-    "Image": {
-        "Name": "benjaminjm112/frontend",
-        "Update": "true"
-    },
-    "Ports": [
-        {
-            "ContainerPort": "80"
-        }
-    ],
-    "Logging": "/var/log/nginx"
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "benjaminjm112/frontend:latest",
+    "Update": "true"
+  },
+  "Authentication": {
+    "Bucket": "dockercredsben",
+    "Key": "dockerhub-auth.json"
+  }
 }
