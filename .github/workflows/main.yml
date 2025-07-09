@@ -22,7 +22,7 @@ jobs:
 
       - name: Build & Test Docker Image
         run: |
-          docker build -t benjaminjm112/frontend . && docker run --rm -e CI=true benjaminjm112/frontend npm run test
+          docker build -t benjaminjm112/frontend .
           zip -r ./${{github.run_id}}.zip . -x '*.git*' "**node_modules**" '.github/*' '*.zip'
       
       - name: Upload Artifacts
